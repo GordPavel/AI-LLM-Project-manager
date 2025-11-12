@@ -69,7 +69,7 @@ public class ChatBotImpl implements ChatBotAdapter {
         }
     }
 
-    void handleCommand(UpdateContext updateContext) {
+    public void handleCommand(UpdateContext updateContext) {
         BotMessage botAnswer = BotMessage.builder()
                 .chatId(updateContext.getChatId())
                 .replyToMessageId(updateContext.getMessageId())
@@ -90,7 +90,7 @@ public class ChatBotImpl implements ChatBotAdapter {
         sendMessage(botAnswer);
     }
 
-    void handleTextMessage(UpdateContext updateContext) {
+    public void handleTextMessage(UpdateContext updateContext) {
         // Или просто вызвать сервисный метод для уведомления о пришедшем сообщении, или через Обсерв.
     }
 

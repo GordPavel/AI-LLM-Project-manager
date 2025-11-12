@@ -18,7 +18,7 @@ public class BotConfig {
     }
     
     @Bean(initMethod = "start", destroyMethod = "stop")
-    public ChatAdapter chatAdapter(TelegramBot bot) {
+    public ChatBotAdapter chatAdapter(TelegramBot bot) {
         return new ChatBotImpl(bot);
     }
 }
