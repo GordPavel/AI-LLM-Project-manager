@@ -12,7 +12,7 @@ import com.tbank.aihelper.telegrambot.dto.UpdateContext;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ChatBotImpl implements ChatAdapter {
+public class ChatBotImpl implements ChatBotAdapter {
     private final TelegramBot bot;
     
     public ChatBotImpl(TelegramBot bot) {
