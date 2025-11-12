@@ -1,4 +1,4 @@
-package com.tbank.aihelper.telegrambot;
+package com.tbank.aihelper.telegrambot.dto;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,6 +7,6 @@ import lombok.Data;
 @Builder
 public class BotMessage {
     private Long chatId;
-    private Long replyToMessageId;
+    private Integer replyToMessageId;
     private String textMessage;
 }

@@ -1,4 +1,4 @@
-package com.tbank.aihelper.telegrambot;
+package com.tbank.aihelper.telegrambot.dto;
 
 import lombok.Builder;
 import lombok.Data;
