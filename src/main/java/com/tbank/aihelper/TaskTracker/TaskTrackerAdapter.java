@@ -1,11 +1,11 @@
 package com.tbank.aihelper.TaskTracker;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface TaskTrackerAdapter {
-    Optional<TaskItem> getTask(String key);
 
-    List<TaskSearchResult> search(String query, int limit);
+    Optional<TaskItem> getTask(String key);
 
     TaskItem createTask(String queue, String summary, String description, String assignee);
 
@@ -14,6 +14,11 @@ public interface TaskTrackerAdapter {
     TaskItem transitionTask(String key, String newStatus);
 
     boolean deleteTask(String key);
-}
 
+    List<TaskComment> getComments(String key);
+
+    TaskComment addComment(String key, String text, String author);
+
+    boolean deleteComment(String key, String commentId);
+}
 

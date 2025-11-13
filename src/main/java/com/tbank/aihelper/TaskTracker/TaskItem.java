@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.ZonedDateTime;
+import java.util.List; // Импортируем List
 
 @Data
 @Builder
@@ -21,4 +22,5 @@ public class TaskItem {
     private ZonedDateTime createdAt;
     private ZonedDateTime updatedAt;
     private String url;
+    private List<TaskComment> comments;
 }
