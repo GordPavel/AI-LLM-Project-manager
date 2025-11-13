@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.tbank.aihelper.telegrambot.observer.ObserverChatBotAdapter;
 
 @Configuration
 public class BotConfig {
@@ -18,7 +19,7 @@ public class BotConfig {
     }
     
     @Bean(initMethod = "start", destroyMethod = "stop")
-    public ChatBotAdapter chatAdapter(TelegramBot bot) {
-        return new ChatBotImpl(bot);
+    public ChatBotAdapter chatAdapter(TelegramBot bot, ObserverChatBotAdapter observerChatBotAdapter) {
+        return new ChatBotImpl(bot, observerChatBotAdapter);
     }
 }

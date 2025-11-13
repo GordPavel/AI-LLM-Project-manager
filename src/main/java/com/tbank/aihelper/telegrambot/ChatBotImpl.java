@@ -8,14 +8,17 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.tbank.aihelper.telegrambot.dto.BotMessage;
 import com.tbank.aihelper.telegrambot.dto.UpdateContext;
+import com.tbank.aihelper.telegrambot.observer.ObserverChatBotAdapter;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ChatBotImpl implements ChatBotAdapter {
+    private final ObserverChatBotAdapter observerChatBotAdapter;
     private final TelegramBot bot;
     
-    public ChatBotImpl(TelegramBot bot) {
+    public ChatBotImpl(TelegramBot bot, ObserverChatBotAdapter observerChatBotAdapter) {
+        this.observerChatBotAdapter = observerChatBotAdapter;
         this.bot = bot;
     }
 
@@ -91,7 +94,7 @@ public class ChatBotImpl implements ChatBotAdapter {
     }
 
     public void handleTextMessage(UpdateContext updateContext) {
-        // Или просто вызвать сервисный метод для уведомления о пришедшем сообщении, или через Обсерв.
+        observerChatBotAdapter.notifyNewMessage(updateContext);
     }
 
     private boolean isGroupChat(Message message) {
