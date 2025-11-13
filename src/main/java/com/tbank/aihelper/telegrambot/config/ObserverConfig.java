@@ -1,4 +1,4 @@
-package com.tbank.aihelper.telegrambot;
+package com.tbank.aihelper.telegrambot.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;

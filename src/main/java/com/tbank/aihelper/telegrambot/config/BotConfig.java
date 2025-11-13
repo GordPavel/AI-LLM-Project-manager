@@ -1,10 +1,12 @@
-package com.tbank.aihelper.telegrambot;
+package com.tbank.aihelper.telegrambot.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.tbank.aihelper.telegrambot.ChatBotAdapter;
+import com.tbank.aihelper.telegrambot.ChatBotImpl;
 import com.tbank.aihelper.telegrambot.observer.ObserverChatBotAdapter;
 
 @Configuration
