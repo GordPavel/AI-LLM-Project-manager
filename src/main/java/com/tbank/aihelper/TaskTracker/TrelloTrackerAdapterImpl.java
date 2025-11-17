@@ -8,11 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import jakarta.annotation.PostConstruct;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,48 +19,43 @@ public class TrelloTrackerAdapterImpl implements TaskTrackerAdapter {
 
     private static final String API_BASE_URL = "https://api.trello.com/1";
 
-
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final TrelloConfig config;
 
-    private final Map<String, String> statusToListId = new ConcurrentHashMap<>();
-    private final Map<String, String> listIdToStatus = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    public void init() {
-        loadBoardLists();
-    }
-
-    private void loadBoardLists() {
-        String url = String.format("%s/boards/%s/lists?key=%s&token=%s",
-                API_BASE_URL, config.getBoardId(), config.getApiKey(), config.getToken());
-
-        TrelloList[] lists = restTemplate.getForObject(url, TrelloList[].class);
-
-        if (lists == null || lists.length == 0) {
-            throw new IllegalStateException("Не удалось загрузить списки с доски Trello: " + config.getBoardId());
-        }
-
-        statusToListId.clear();
-        listIdToStatus.clear();
-
-        for (TrelloList list : lists) {
-            if (!list.isClosed()) {
-                statusToListId.put(list.getName(), list.getId());
-                listIdToStatus.put(list.getId(), list.getName());
-            }
-        }
-
-        System.out.println("Trello: загружены списки → " + statusToListId.keySet());
-    }
 
     private String buildUrl(String path) {
         return String.format("%s%s?key=%s&token=%s", API_BASE_URL, path, config.getApiKey(), config.getToken());
     }
 
+    private String getListIdByName(String statusName) {
+        String url = String.format("%s/boards/%s/lists?key=%s&token=%s",
+                API_BASE_URL, config.getBoardId(), config.getApiKey(), config.getToken());
+
+        TrelloList[] lists = restTemplate.getForObject(url, TrelloList[].class);
+        if (lists == null || lists.length == 0) {
+            throw new IllegalStateException("Не удалось получить списки с доски Trello");
+        }
+
+        return Arrays.stream(lists)
+                .filter(list -> !list.isClosed())
+                .filter(list -> list.getName().equals(statusName))
+                .findFirst()
+                .map(TrelloList::getId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Колонка с именем '" + statusName + "' не найдена на доске. Доступные: " +
+                                Arrays.stream(lists)
+                                        .filter(l -> !l.isClosed())
+                                        .map(TrelloList::getName)
+                                        .collect(Collectors.toList())
+                ));
+    }
+
     private TaskItem toTaskItem(TrelloCard card, List<TaskComment> comments) {
-        String status = listIdToStatus.getOrDefault(card.getIdList(), "Unknown");
+        String status = card.getIdList() != null
+                ? getStatusNameByListId(card.getIdList())
+                : "Unknown";
 
         ZonedDateTime updatedAt = card.getDateLastActivity() != null
                 ? ZonedDateTime.parse(card.getDateLastActivity()).withZoneSameInstant(ZoneId.of("UTC"))
@@ -84,6 +77,12 @@ public class TrelloTrackerAdapterImpl implements TaskTrackerAdapter {
                 .build();
     }
 
+    private String getStatusNameByListId(String idList) {
+        String url = String.format("%s/lists/%s?key=%s&token=%s", API_BASE_URL, idList, config.getApiKey(), config.getToken());
+        TrelloList list = restTemplate.getForObject(url, TrelloList.class);
+        return list != null && !list.isClosed() ? list.getName() : "Unknown";
+    }
+
     @Override
     public Optional<TaskItem> getTask(String key) {
         try {
@@ -99,16 +98,13 @@ public class TrelloTrackerAdapterImpl implements TaskTrackerAdapter {
 
     @Override
     public TaskItem createTask(String queue, String summary, String description, String assignee) {
-        String listId = statusToListId.get("To Do");
-        if (listId == null) {
-            throw new IllegalStateException("На доске Trello не найден список 'To Do'. Проверь названия списков.");
-        }
+        String listId = getListIdByName("To Do"); // ← всегда свежий
 
         Map<String, String> params = Map.of(
                 "name", summary,
                 "desc", description,
                 "idList", listId,
-                "idMembers", assignee.isEmpty() ? "" : assignee
+                "idMembers", assignee
         );
 
         TrelloCard card = restTemplate.postForObject(buildUrl("/cards"), params, TrelloCard.class);
@@ -117,8 +113,7 @@ public class TrelloTrackerAdapterImpl implements TaskTrackerAdapter {
 
     @Override
     public TaskItem updateTask(String key, String newSummary, String newDescription, String newStatus) {
-        String listId = statusToListId.get(newStatus);
-        if (listId == null) throw new IllegalArgumentException("Неизвестный статус: " + newStatus);
+        String listId = getListIdByName(newStatus);
 
         restTemplate.put(buildUrl("/cards/" + key),
                 Map.of("name", newSummary, "desc", newDescription, "idList", listId));
@@ -128,8 +123,7 @@ public class TrelloTrackerAdapterImpl implements TaskTrackerAdapter {
 
     @Override
     public TaskItem transitionTask(String key, String newStatus) {
-        String listId = statusToListId.get(newStatus);
-        if (listId == null) throw new IllegalArgumentException("Неизвестный статус: " + newStatus);
+        String listId = getListIdByName(newStatus);
 
         restTemplate.put(buildUrl("/cards/" + key), Map.of("idList", listId));
         return getTask(key).orElseThrow();
@@ -158,7 +152,7 @@ public class TrelloTrackerAdapterImpl implements TaskTrackerAdapter {
                             .id(a.getId())
                             .author(a.getMemberCreator() != null ? a.getMemberCreator().getFullName() : "Unknown")
                             .createdAt(ZonedDateTime.parse(a.getDate()))
-                            .text(a.getData() != null ? a.getData().getText() : "")
+                            .text(a.getData() != null && a.getData().getText() != null ? a.getData().getText() : "")
                             .build())
                     .collect(Collectors.toList());
         } catch (Exception e) {
