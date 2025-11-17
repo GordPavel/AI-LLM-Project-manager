@@ -1,0 +1,4 @@
+bookstack:
+  api:
+    url: https://bookstack.bassopaolo.com/api
+    token: токен

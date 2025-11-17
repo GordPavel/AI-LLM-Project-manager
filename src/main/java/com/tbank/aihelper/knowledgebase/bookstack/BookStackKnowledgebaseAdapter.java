@@ -1,5 +1,7 @@
-package com.tbank.aihelper.knowledgebase;
+package com.tbank.aihelper.knowledgebase.bookstack;
 
+import com.tbank.aihelper.knowledgebase.*;
+import com.tbank.aihelper.knowledgebase.bookstack.config.BookStackProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -11,23 +13,26 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class BookStackKnowledgebaseAdapter implements KnowledgebaseAdapter{
+public class BookStackKnowledgebaseAdapter implements KnowledgebaseAdapter {
 
     private RestTemplate restTemplate;
 
-    private static final String BASE_URL = "https://bookstack.bassopaolo.com/api";
-    private static final String TOKEN = "токен";
+    private BookStackProperties bookStackProperties;
+
+    public BookStackKnowledgebaseAdapter(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     private HttpHeaders authHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(TOKEN);
+        headers.setBearerAuth(bookStackProperties.getToken());
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }
 
     @Override
     public Optional<KnowledgeItem> getArticle(String id) {
-        String url = BASE_URL + "/pages/" + id;
+        String url = bookStackProperties.getUrl() + "/pages/" + id;
 
         try {
             ResponseEntity<PageResponse> response = restTemplate.exchange(
@@ -62,7 +67,7 @@ public class BookStackKnowledgebaseAdapter implements KnowledgebaseAdapter{
 
         try {
             ResponseEntity<PageResponse> response = restTemplate.exchange(
-                    BASE_URL + "/pages",
+                    bookStackProperties.getUrl() + "/pages",
                     HttpMethod.POST,
                     entity,
                     PageResponse.class
@@ -79,7 +84,7 @@ public class BookStackKnowledgebaseAdapter implements KnowledgebaseAdapter{
 
     @Override
     public KnowledgeItem updateArticle(String id, String newTitle, String newContent) {
-        String url = BASE_URL + "/pages/" + id;
+        String url = bookStackProperties.getUrl() + "/pages/" + id;
 
         var request = UpdatePageRequest.builder()
                 .name(newTitle)
@@ -106,7 +111,7 @@ public class BookStackKnowledgebaseAdapter implements KnowledgebaseAdapter{
 
     @Override
     public boolean deleteArticle(String id) {
-        String url = BASE_URL + "/pages/" + id;
+        String url = bookStackProperties.getUrl() + "/pages/" + id;
 
         try {
             ResponseEntity<Void> response = restTemplate.exchange(
