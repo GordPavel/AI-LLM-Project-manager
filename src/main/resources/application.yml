@@ -1,3 +1,7 @@
+telegram:
+  bot:
+    token: ${TG_BOT_TOKEN}
+
 bookstack:
   api:
     url: https://bookstack.bassopaolo.com/api
