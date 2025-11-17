@@ -21,4 +21,3 @@ public interface TaskTrackerAdapter {
 
     boolean deleteComment(String key, String commentId);
 }
-
