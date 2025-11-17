@@ -2,3 +2,4 @@ bookstack:
   api:
     url: https://bookstack.bassopaolo.com/api
     token: токен
+# Кредишинолы к Api Trello будут храниться в GitHub Secrets
