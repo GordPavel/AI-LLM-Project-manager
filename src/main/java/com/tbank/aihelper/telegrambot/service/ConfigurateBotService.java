@@ -32,7 +32,12 @@ public class ConfigurateBotService implements EventListenerChatBot {
 
     public void handleNewMessage(UpdateContext updateContext) {
 
-        if(!updateContext.getCommand().equals(HANDLE_COMMAND))
+        if(updateContext.getCommand() == null 
+            || !updateContext.getCommand().equals(HANDLE_COMMAND))
+            return;
+
+        if(updateContext.getTextMessage() == null 
+            || updateContext.getTextMessage().isEmpty())
             return;
 
         chatConfigurationRepository.save(

@@ -94,7 +94,7 @@ public class ChatBotImpl implements ChatBotAdapter {
     }
 
     public void handleTextMessage(UpdateContext updateContext) {
-        observerChatBotAdapter.notifyNewMessage(updateContext);
+        return;
     }
 
     private boolean isGroupChat(Message message) {

@@ -23,4 +23,10 @@ public class ChatConfiguration {
 
     @Column(name = "configuration")
     private String configuration;
+
+    @Column(name = "created_at", updatable = false)
+    private java.time.ZonedDateTime createdAt = java.time.ZonedDateTime.now();
+
+    @Column(name = "updated_at")
+    private java.time.ZonedDateTime updatedAt = java.time.ZonedDateTime.now();
 }
