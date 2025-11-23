@@ -2,6 +2,7 @@ package com.tbank.aihelper.telegrambot.service;
 
 import org.springframework.stereotype.Service;
 
+import com.tbank.aihelper.llm.LLMAdapter;
 import com.tbank.aihelper.telegrambot.ChatBotAdapter;
 import com.tbank.aihelper.telegrambot.dto.BotMessage;
 import com.tbank.aihelper.telegrambot.dto.UpdateContext;
@@ -23,6 +24,7 @@ public class BriefStatusTaskService implements EventListenerChatBot {
     private final ChatBotAdapter chatBotAdapter;
     private final ChatConfigurationRepository chatConfigurationRepository;
     private final ObserverChatBotAdapter observerChatBotAdapter;
+    private final LLMAdapter llmAdapter;
 
     @PostConstruct
     private void subscribeToObserver() {
@@ -36,12 +38,12 @@ public class BriefStatusTaskService implements EventListenerChatBot {
         
         // chatConfigurationRepository.findByChatId(updateContext.getChatId());
         
-        // Метод для запроса на llm
+        String llmAnswer = llmAdapter.ask(updateContext.getTextMessage());
         
-        // chatBotAdapter.sendMessage(BotMessage.builder()
-        //         .chatId(updateContext.getChatId())
-        //         .replyToMessageId(updateContext.getMessageId())
-        //         .textMessage()
-        //     .build());
+        chatBotAdapter.sendMessage(BotMessage.builder()
+                .chatId(updateContext.getChatId())
+                .replyToMessageId(updateContext.getMessageId())
+                .textMessage(llmAnswer)
+            .build());
     }
 }
