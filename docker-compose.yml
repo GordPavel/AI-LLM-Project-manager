@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: aihelper-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aihelper_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Kent12052@
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mariadb:
+    image: mariadb:10.11
+    container_name: bookstack-mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Kent12052@
+      MYSQL_DATABASE: bookstackapp
+      MYSQL_USER: postgres
+      MYSQL_PASSWORD: Kent12052@
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -u postgres -pKent12052@"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  bookstack:
+    image: lscr.io/linuxserver/bookstack:latest
+    container_name: bookstack
+    restart: unless-stopped
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Europe/Moscow
+      APP_URL: http://10.0.0.9:6875
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_DATABASE: bookstackapp
+      DB_USERNAME: postgres
+      DB_PASSWORD: Kent12052@
+      APP_KEY: base64:cyHl1pqWYmMyuRdX1XMww9IVqHWXp1NQkxkYDOg4r4w=
+    ports:
+      - "6875:80"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - bookstack_uploads:/config/www/public/uploads
+      - bookstack_storage:/config/www/storage/uploads
+
+volumes:
+  postgres_data:
+  mariadb_data:
+  bookstack_uploads:
+  bookstack_storage:
