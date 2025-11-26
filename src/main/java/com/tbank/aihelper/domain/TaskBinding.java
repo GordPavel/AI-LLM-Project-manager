@@ -18,6 +18,12 @@ public class TaskBinding {
     @Column(name = "telegram_chat_id", nullable = false)
     private Long telegramChatId;
 
+    @Column(name = "bookstack_page_id")
+    private Long bookstackPageId;
+
+    @Column(name = "bookstack_url", length = 512)
+    private String bookstackUrl;
+
     @Column(name = "created_at", updatable = false)
     private java.time.ZonedDateTime createdAt = java.time.ZonedDateTime.now();
 
