@@ -9,6 +9,8 @@ bookstack:
 # Кредишинолы к Api Trello будут храниться в GitHub Secrets
 llm:
   openrouter:
-    api-key: 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
-    model: x-ai/grok-4.1-fast        # можно менять на openai/gpt-4o, anthropic/claude-3.5-sonnet и т.д.
+    api-key: ключ
+    model: x-ai/grok-4.1-fast
     base-url: https://openrouter.ai/api/v1
+    referer: http://localhost:8080/
+    title: AI Project Manager
