@@ -5,7 +5,7 @@ telegram:
 bookstack:
   api:
     url: https://bookstack.bassopaolo.com/api
-    token: токен
+    token: ${BOOKSTACK_TOKEN:}
 # Кредишинолы к Api Trello будут храниться в GitHub Secrets
 llm:
   openrouter:
@@ -14,3 +14,33 @@ llm:
     base-url: https://openrouter.ai/api/v1
     referer: http://localhost:8080/
     title: AI Project Manager
+trello:
+  api-key: ${TRELLO_API_KEY}
+  token: ${TRELLO_TOKEN}
+  board-id: viVw85OK
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/aihelper_db}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:Kent12052@}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+# Flyway пока выключен — включим потом
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql: trace
+
