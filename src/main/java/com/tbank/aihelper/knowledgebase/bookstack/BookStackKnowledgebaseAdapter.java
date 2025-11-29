@@ -25,7 +25,7 @@ public class BookStackKnowledgebaseAdapter implements KnowledgebaseAdapter {
 
     private HttpHeaders authHeaders() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(bookStackProperties.getToken());
+        headers.setBearerAuth(bookStackProperties.getBearerToken());
         headers.setContentType(MediaType.APPLICATION_JSON);
         return headers;
     }

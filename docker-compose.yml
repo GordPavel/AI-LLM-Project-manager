@@ -57,7 +57,18 @@ services:
     volumes:
       - bookstack_uploads:/config/www/public/uploads
       - bookstack_storage:/config/www/storage/uploads
-
+  ai-helper:
+    build: .
+    container_name: ai-helper-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    # Никаких DB_URL — они берутся из application.yml
 volumes:
   postgres_data:
   mariadb_data:
