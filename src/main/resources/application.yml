@@ -6,7 +6,14 @@ bookstack:
   api:
     url: https://bookstack.bassopaolo.com/api
     token: ${BOOKSTACK_TOKEN:}
-
+# Кредишинолы к Api Trello будут храниться в GitHub Secrets
+llm:
+  openrouter:
+    api-key: ключ
+    model: x-ai/grok-4.1-fast
+    base-url: https://openrouter.ai/api/v1
+    referer: http://localhost:8080/
+    title: AI Project Manager
 trello:
   api-key: ${TRELLO_API_KEY}
   token: ${TRELLO_TOKEN}
@@ -36,3 +43,4 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
+

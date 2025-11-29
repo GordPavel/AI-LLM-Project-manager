@@ -7,7 +7,8 @@ import lombok.Data;
 @Builder
 public class UpdateContext {
     private Long chatId;
-    private String text;
+    private String textMessage;
+    private String command;
     private Integer messageId;
     private Long userId;
     private String userName;

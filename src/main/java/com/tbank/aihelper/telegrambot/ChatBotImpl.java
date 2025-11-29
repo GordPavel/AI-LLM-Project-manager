@@ -43,19 +43,32 @@ public class ChatBotImpl implements ChatBotAdapter {
         
         UpdateContext updateContext = UpdateContext.builder()
                 .chatId(message.chat().id())
-                .text(message.text())
                 .messageId(message.messageId())
                 .userId(message.from().id())
                 .userName(message.from().username())
                 .isGroupChat(isGroupChat(message))
             .build();
+
+        parseMessageAndSet(message.text(), updateContext);
         
-        log.debug("Received message: {}", updateContext.getText());
-        if (updateContext.getText().startsWith("/")) {
-            handleCommand(updateContext);
-        } else if(updateContext.isGroupChat()) {
-            handleTextMessage(updateContext);
+        log.debug("Received message: {}", updateContext.getTextMessage());
+        handleNewMessage(updateContext);
+    }
+
+    private void parseMessageAndSet(String message, UpdateContext updateContext) {
+        if(!message.startsWith("/")) {
+            updateContext.setTextMessage(message);
+            return;
         }
+
+        int spaceIndex = message.indexOf(' ');
+        if(spaceIndex < 0) {
+            updateContext.setCommand(message);
+            return;
+        }
+
+        updateContext.setCommand(message.substring(0, spaceIndex));
+        updateContext.setTextMessage(message.substring(spaceIndex + 1));
     }
 
     public void sendMessage(BotMessage message) {
@@ -72,28 +85,7 @@ public class ChatBotImpl implements ChatBotAdapter {
         }
     }
 
-    public void handleCommand(UpdateContext updateContext) {
-        BotMessage botAnswer = BotMessage.builder()
-                .chatId(updateContext.getChatId())
-                .replyToMessageId(updateContext.getMessageId())
-            .build();
-        
-        switch (updateContext.getText().toLowerCase()) {
-            case "/start":
-                botAnswer.setTextMessage("Добавь меня в групповую беседу для прослушивания.");
-                break;
-            case "/help":
-                botAnswer.setTextMessage("Доступные команды:\n/start - начать\n/help - помощь.");
-                break;
-            default:
-                botAnswer.setTextMessage("Неизвестная команда. Используйте /help для списка команд.");
-                break;
-        }
-        
-        sendMessage(botAnswer);
-    }
-
-    public void handleTextMessage(UpdateContext updateContext) {
+    public void handleNewMessage(UpdateContext updateContext) {
         observerChatBotAdapter.notifyNewMessage(updateContext);
     }
 
