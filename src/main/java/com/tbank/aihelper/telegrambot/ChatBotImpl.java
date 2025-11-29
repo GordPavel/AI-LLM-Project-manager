@@ -52,11 +52,7 @@ public class ChatBotImpl implements ChatBotAdapter {
         parseMessageAndSet(message.text(), updateContext);
         
         log.debug("Received message: {}", updateContext.getTextMessage());
-        if (updateContext.getCommand() != null) {
-            handleCommand(updateContext);
-        } else if(updateContext.isGroupChat()) {
-            handleTextMessage(updateContext);
-        }
+        handleNewMessage(updateContext);
     }
 
     private void parseMessageAndSet(String message, UpdateContext updateContext) {
@@ -89,12 +85,8 @@ public class ChatBotImpl implements ChatBotAdapter {
         }
     }
 
-    public void handleCommand(UpdateContext updateContext) {
+    public void handleNewMessage(UpdateContext updateContext) {
         observerChatBotAdapter.notifyNewMessage(updateContext);
-    }
-
-    public void handleTextMessage(UpdateContext updateContext) {
-        return;
     }
 
     private boolean isGroupChat(Message message) {
