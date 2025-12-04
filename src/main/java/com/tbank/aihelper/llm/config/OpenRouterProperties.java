@@ -13,7 +13,7 @@ public class OpenRouterProperties {
     @NotBlank
     private String apiKey;
 
-    private String model = "x-ai/grok-4.1-fast";
+    private String model = "amazon/nova-2-lite-v1:free";
 
     @NotBlank
     private String baseUrl = "https://openrouter.ai/api/v1";

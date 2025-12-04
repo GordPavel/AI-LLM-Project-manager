@@ -8,11 +8,13 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 @Entity
 @Data
 @Builder
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class ChatConfiguration {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
