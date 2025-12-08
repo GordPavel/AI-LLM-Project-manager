@@ -9,8 +9,8 @@ bookstack:
 # Кредишинолы к Api Trello будут храниться в GitHub Secrets
 llm:
   openrouter:
-    api-key: ключ
-    model: x-ai/grok-4.1-fast
+    api-key: ${LLM_API_KEY}
+    model: amazon/nova-2-lite-v1:free
     base-url: https://openrouter.ai/api/v1
     referer: http://localhost:8080/
     title: AI Project Manager
@@ -34,6 +34,11 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+
 # Flyway пока выключен — включим потом
   flyway:
     enabled: true
@@ -41,6 +46,11 @@ spring:
 
 logging:
   level:
+    com:
+      tbank:
+        aihelper:
+          telegrambot: DEBUG
+          
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
 

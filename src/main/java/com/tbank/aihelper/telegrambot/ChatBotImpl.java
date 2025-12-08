@@ -4,6 +4,7 @@ import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.ReplyParameters;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.tbank.aihelper.telegrambot.dto.BotMessage;
@@ -72,14 +73,13 @@ public class ChatBotImpl implements ChatBotAdapter {
     }
 
     public void sendMessage(BotMessage message) {
-        SendMessage request = new SendMessage(message.getChatId(), message.getTextMessage());
+        SendMessage request = new SendMessage(message.getChatId().longValue(), message.getTextMessage());
         
         if (message.getReplyToMessageId() != null) {
-            request.replyToMessageId(message.getReplyToMessageId().intValue());
+            request.replyParameters(new ReplyParameters(message.getReplyToMessageId()));
         }
-        
+
         SendResponse response = bot.execute(request);
-        
         if (!response.isOk()) {
             log.error("Failed to send message: {}", response.description());
         }

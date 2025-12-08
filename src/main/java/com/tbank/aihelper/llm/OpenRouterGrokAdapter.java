@@ -61,6 +61,7 @@ public class OpenRouterGrokAdapter implements LLMAdapter {
             try {
                 lastResponse = mapper.convertValue(responseBody, ChatCompletionResponse.class);
             } catch (Exception e) {
+                log.warn("Не удалось расспарсить следующий текст: {}", responseBody);
                 throw new ParsingResponseException(e);
             }
 

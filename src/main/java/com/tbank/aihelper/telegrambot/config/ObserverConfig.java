@@ -1,12 +1,12 @@
 package com.tbank.aihelper.telegrambot.config;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 import com.tbank.aihelper.telegrambot.observer.ObserverChatBotAdapter;
 import com.tbank.aihelper.telegrambot.observer.ObserverChatBotImpl;
 
-@Component
+@Configuration
 public class ObserverConfig {
     
     @Bean

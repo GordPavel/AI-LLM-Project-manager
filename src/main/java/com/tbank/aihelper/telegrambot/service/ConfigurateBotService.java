@@ -6,6 +6,7 @@ import com.tbank.aihelper.telegrambot.ChatBotAdapter;
 import com.tbank.aihelper.telegrambot.dto.BotMessage;
 import com.tbank.aihelper.telegrambot.dto.UpdateContext;
 import com.tbank.aihelper.telegrambot.entity.ChatConfiguration;
+import com.tbank.aihelper.telegrambot.exception.NotFoundException;
 import com.tbank.aihelper.telegrambot.observer.EventListenerChatBot;
 import com.tbank.aihelper.telegrambot.observer.ObserverChatBotAdapter;
 import com.tbank.aihelper.telegrambot.repository.ChatConfigurationRepository;
@@ -52,5 +53,21 @@ public class ConfigurateBotService implements EventListenerChatBot {
                 .replyToMessageId(updateContext.getMessageId())
                 .textMessage("Конфигурация бота для чата была сохранена.")
             .build());
+    }
+
+    public ChatConfiguration getChatConfig(Long chatId) throws NotFoundException {
+        return chatConfigurationRepository.findByChatId(chatId)
+            .orElseThrow(() -> {
+                chatBotAdapter.sendMessage(BotMessage.builder()
+                        .chatId(chatId)
+                        .textMessage("Конфигурация бота не найдена.")
+                    .build());
+
+                return new NotFoundException(
+                    "ChatConfiguration", 
+                    chatId.toString(), 
+                    "Database"
+                );
+            });
     }
 }
