@@ -10,25 +10,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatConfiguration {
+public class JobBindingChat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "chat_id", unique = true, nullable = false)
+    
+    @Column(name = "chat_id", nullable = false)
     private Long chatId;
-
-    @Column(name = "configuration", nullable = false)
-    private String configuration;
-
-    @Column(name = "created_at", updatable = false)
-    private java.time.ZonedDateTime createdAt = java.time.ZonedDateTime.now();
-
-    @Column(name = "updated_at")
-    private java.time.ZonedDateTime updatedAt = java.time.ZonedDateTime.now();
+    
+    @Column(name = "job_id", nullable = false)
+    private String jobId;
 }
