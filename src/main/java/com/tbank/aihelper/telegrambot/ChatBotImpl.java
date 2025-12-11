@@ -9,6 +9,8 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.tbank.aihelper.telegrambot.dto.BotMessage;
 import com.tbank.aihelper.telegrambot.dto.UpdateContext;
+import com.tbank.aihelper.telegrambot.exception.BaseTelegramBotException;
+import com.tbank.aihelper.telegrambot.exception.LLMOutputParseException;
 import com.tbank.aihelper.telegrambot.observer.ObserverChatBotAdapter;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,20 @@ public class ChatBotImpl implements ChatBotAdapter {
             for (Update update : updates) {
                 try {
                     processUpdate(update);
+                } catch (LLMOutputParseException e) {
+                    log.error("{}", e.getMessage());
+                    sendMessage(BotMessage.builder()
+                            .chatId(e.getChatId())
+                            .textMessage(e.getMessageToClient())
+                        .build()
+                    );
+                } catch (BaseTelegramBotException e) {
+                    log.warn("{}", e.getMessage());
+                    sendMessage(BotMessage.builder()
+                            .chatId(e.getChatId())
+                            .textMessage(e.getMessageToClient())
+                        .build()
+                    );
                 } catch (Exception e) {
                     log.error("Error processing update: {}", e.getMessage());                
                 }

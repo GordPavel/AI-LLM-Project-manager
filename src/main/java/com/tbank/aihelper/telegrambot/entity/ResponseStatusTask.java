@@ -1,17 +1,14 @@
 package com.tbank.aihelper.telegrambot.entity;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -25,27 +22,27 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class JobBindingChat {
+public class ResponseStatusTask {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "task_id", nullable = false, length = 10240)
-    private String taskId;
     
     @ManyToOne
-    @JoinColumn(name = "chat_id", nullable = false)
-    private ChatConfiguration chatConfiguration;
-
-    @ManyToMany
-    @JoinTable(
-        name = "job_performers",
-        joinColumns = @JoinColumn(name = "job_binding_chat_id"),
-        inverseJoinColumns = @JoinColumn(name = "tg_user_id")
-    )
-    private List<TgUser> performers = new ArrayList<>();
+    @JoinColumn(name = "job_id", nullable = false)
+    private JobBindingChat jobBindedChat;
     
+    @ManyToOne
+    @JoinColumn(name = "tg_user_id", nullable = false)
+    private TgUser user;
+    
+    @Column(name = "advice_llm", nullable = false)
+    private String adviceLLM;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "status_id", nullable = false)
+    private TaskStatus identifiedLLMStatus;
+
     @Column(name = "created_at", updatable = false)
     private java.time.ZonedDateTime createdAt;
 
