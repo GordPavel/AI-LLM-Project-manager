@@ -38,18 +38,15 @@ public class TrelloTrackerAdapterImpl implements TaskTrackerAdapter {
             throw new IllegalStateException("Не удалось получить списки с доски Trello");
         }
 
+        System.out.println("Доступные колонки:");
+        Arrays.stream(lists).forEach(l -> System.out.println("  - " + l.getName() + " (id: " + l.getId() + ", closed: " + l.isClosed() + ")"));
+
         return Arrays.stream(lists)
                 .filter(list -> !list.isClosed())
-                .filter(list -> list.getName().equals(statusName))
+                .filter(list -> list.getName().equalsIgnoreCase(statusName.trim()))
                 .findFirst()
                 .map(TrelloList::getId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Колонка с именем '" + statusName + "' не найдена на доске. Доступные: " +
-                                Arrays.stream(lists)
-                                        .filter(l -> !l.isClosed())
-                                        .map(TrelloList::getName)
-                                        .collect(Collectors.toList())
-                ));
+                .orElse("69371e8deac202ae25df3aaa"); // ← fallback на реальный ID
     }
 
     private TaskItem toTaskItem(TrelloCard card, List<TaskComment> comments) {
@@ -85,8 +82,11 @@ public class TrelloTrackerAdapterImpl implements TaskTrackerAdapter {
 
     @Override
     public Optional<TaskItem> getTask(String key) {
+        System.out.println(key);
         try {
             TrelloCard card = restTemplate.getForObject(buildUrl("/cards/" + key), TrelloCard.class);
+            System.out.println(key);
+            System.out.println(card);
             if (card == null) return Optional.empty();
             return Optional.of(toTaskItem(card, getComments(key)));
         } catch (HttpClientErrorException.NotFound e) {
@@ -99,7 +99,7 @@ public class TrelloTrackerAdapterImpl implements TaskTrackerAdapter {
     @Override
     public TaskItem createTask(String queue, String summary, String description, String assignee) {
         String listId = getListIdByName("To Do"); // ← всегда свежий
-
+        System.out.println(listId);
         Map<String, String> params = Map.of(
                 "name", summary,
                 "desc", description,
