@@ -2,11 +2,20 @@ package com.tbank.aihelper.telegrambot.exception;
 
 public class NotFoundException extends BaseTelegramBotException {
     
-    public NotFoundException(String object, String idObject, String typeLocation) {
-        super("Not found '" + object + "' with id: " + idObject + " in '" + typeLocation + "'");
+    public NotFoundException(
+        String messageToLog, 
+        String messageToUser,
+        Long chatId
+    ) {
+        super(messageToLog, messageToUser, chatId);
     }
 
-    public NotFoundException(String object, String idObject, String typeLocation, Throwable cause) {
-        super("Not found '" + object + "' with id: " + idObject + " in '" + typeLocation + "'", cause);    
+    public NotFoundException(
+        String messageToLog, 
+        String messageToUser,
+        Long chatId,
+        Throwable cause
+    ) {
+        super(messageToLog, messageToUser, chatId, cause);
     }
 }

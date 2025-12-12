@@ -2,6 +2,8 @@ package com.tbank.aihelper.telegrambot.dto;
 
 import java.time.ZonedDateTime;
 
+import org.quartz.CronScheduleBuilder;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,4 +12,5 @@ import lombok.Data;
 public class ParsedSetPingMessage {
     private SetPingDto setPingDto;
     private ZonedDateTime zonedDateTime;
+    private CronScheduleBuilder schedule;
 }

@@ -1,18 +1,12 @@
 package com.tbank.aihelper.telegrambot.entity;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
@@ -25,27 +19,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class JobBindingChat {
+public class TgUser {  
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "tg_user_id")
     private Long id;
 
-    @Column(name = "task_id", nullable = false, length = 10240)
-    private String taskId;
-    
-    @ManyToOne
-    @JoinColumn(name = "chat_id", nullable = false)
-    private ChatConfiguration chatConfiguration;
+    @Column(name = "username", nullable = false, unique = true)
+    private String username;
 
-    @ManyToMany
-    @JoinTable(
-        name = "job_performers",
-        joinColumns = @JoinColumn(name = "job_binding_chat_id"),
-        inverseJoinColumns = @JoinColumn(name = "tg_user_id")
-    )
-    private List<TgUser> performers = new ArrayList<>();
-    
     @Column(name = "created_at", updatable = false)
     private java.time.ZonedDateTime createdAt;
 

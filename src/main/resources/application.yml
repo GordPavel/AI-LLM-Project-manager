@@ -21,7 +21,7 @@ trello:
 
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/aihelper_db}
+    url: ${DB_URL:jdbc:postgresql://aihelper-postgres:5432/aihelper_db}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:Kent12052@}
 

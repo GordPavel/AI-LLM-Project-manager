@@ -1,4 +1,4 @@
-package com.tbank.aihelper.telegrambot.service;
+package com.tbank.aihelper.telegrambot.service.commands;
 
 import java.util.List;
 import java.util.Optional;

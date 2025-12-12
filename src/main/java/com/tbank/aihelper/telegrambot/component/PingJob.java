@@ -10,7 +10,6 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 
 import com.tbank.aihelper.telegrambot.ChatBotAdapter;
-import com.tbank.aihelper.telegrambot.service.JobBindingService;
 import com.tbank.aihelper.telegrambot.dto.BotMessage;
 import com.tbank.aihelper.telegrambot.dto.SetPingDto;
 
@@ -21,13 +20,9 @@ public class PingJob implements Job {
 
     @Autowired
     private ChatBotAdapter chatBotAdapter;
-
-    @Autowired
-    private JobBindingService jobBindingService;
     
     @Override
     public void execute(JobExecutionContext context) {
-        String jobId = context.getJobDetail().getKey().getName(); 
         SetPingDto data = (SetPingDto) context.getMergedJobDataMap().get("setPingDto");
         log.debug("{}", data);
 
@@ -39,8 +34,5 @@ public class PingJob implements Job {
                     data.getTaskId(), String.join(", ", data.getUsernamesToPing()))
                 )
             .build());
-        
-        log.debug("Delete 'JobBindingChat' from database by ");
-        jobBindingService.cleanupJobBinding(jobId);
     }
 }
