@@ -68,6 +68,10 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - TG_BOT_TOKEN=${TG_BOT_TOKEN}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - TRELLO_API_KEY=${TRELLO_API_KEY}
+      - TRELLO_TOKEN=${TRELLO_TOKEN}
     # Никаких DB_URL — они берутся из application.yml
 volumes:
   postgres_data:

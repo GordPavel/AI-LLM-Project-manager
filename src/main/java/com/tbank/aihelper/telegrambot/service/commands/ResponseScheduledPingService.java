@@ -86,15 +86,16 @@ public class ResponseScheduledPingService implements EventListenerChatBot {
         //     + "\n"
         //     + "ВАЖНО: Не путай пинг и задачу это разные идентификаторы. Так же если ОБА идентификатора null (если один из идентификаторов null тогда данных достаточно) или из сообщения невозможно однозначно определить этап выполнения задачи, выведи только:"
         //     + "\n" + LLM_DEFICIT_MSG;
-        String prompt = "Ты — опытный проектный менеджер. Проанализируй сообщение пользователя и определи, на каком этапе жизненного цикла выполнения задачи он находится. Возможные этапы:\n" 
+        String prompt = "Всегда пиши только итоговый ответ и ничего больше. Ты — опытный проектный менеджер. Проанализируй сообщение пользователя и определи, на каком этапе жизненного цикла выполнения задачи он находится. Возможные этапы:\n" 
             + enumValues + ".\n\n"
-            + "Если пользователь явно указал идентификатор пинга (например, «пинг #2», «ping_id=2», «/response_ping касательно пинга #2»), — тогда выведи ответ в формате из четырёх строк:\n"
+            + "Если пользователь явно указал идентификатор пинга (например, «пинг #2», «ping_id=2», «/response_ping касательно пинга #2»), — тогда выведи ответ к тексту формата:\n"
             + "\n"
-                + "число ping_id, если оно указано; иначе null.\n"
+                + "ping_id\n"
                 + "null\n"
-                + "один из статусов: " + enumValues + "\n"
+                + "status\n"
                 + "краткий (1–2 предложения), конкретный совет, основанный на лучших практиках управления задачами. Обязательно упомяни в совете ping_id, если он присутствует. Если ping_id — null, не формируй совет, а верни «Мало данных».\n"
             + "\n"
+            + "В ответе не указывай названия переменных, только их значения.\n"
             + "Важно: если идентификатор пинга отсутствует (то есть первая строка — null), ответ должен быть только:"
             + "\n" + LLM_DEFICIT_MSG;
 
@@ -105,7 +106,7 @@ public class ResponseScheduledPingService implements EventListenerChatBot {
         String responseLLM = llmAdapter.ask(requestLLM);
         log.debug(responseLLM);
 
-        if(responseLLM.split("\n")[0].equals(LLM_DEFICIT_MSG))
+        if(responseLLM.split("\n")[0].trim().equals(LLM_DEFICIT_MSG))
             throw new LLMDataDeficitException(
                 updateContext.getTextMessage(), 
                 HANDLE_COMMAND, 
@@ -114,9 +115,11 @@ public class ResponseScheduledPingService implements EventListenerChatBot {
 
         try {
             return createResponseStatusTask(
-                responseLLM.lines().toList(), 
+                responseLLM.lines().map(String::trim).toList(), 
                 updateContext
             );
+        } catch (LLMOutputParseException e) {
+            throw e;
         } catch (Exception e) {
             throw new LLMOutputParseException(
                 responseLLM, 
