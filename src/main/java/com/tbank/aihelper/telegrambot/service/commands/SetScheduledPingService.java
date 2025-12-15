@@ -4,21 +4,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.quartz.CronScheduleBuilder;
-import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
 import org.springframework.stereotype.Service;
 
 import com.tbank.aihelper.llm.LLMAdapter;
-import com.tbank.aihelper.telegrambot.component.PingJob;
 import com.tbank.aihelper.telegrambot.dto.ParsedSetPingMessage;
 import com.tbank.aihelper.telegrambot.dto.SetPingDto;
 import com.tbank.aihelper.telegrambot.dto.UpdateContext;
@@ -30,6 +24,7 @@ import com.tbank.aihelper.telegrambot.observer.EventListenerChatBot;
 import com.tbank.aihelper.telegrambot.observer.ObserverChatBotAdapter;
 import com.tbank.aihelper.telegrambot.service.CommandUtilsService;
 import com.tbank.aihelper.telegrambot.service.JobBindingService;
+import com.tbank.aihelper.telegrambot.service.ScheduledPingService;
 import com.tbank.aihelper.telegrambot.service.UserService;
 
 import jakarta.annotation.PostConstruct;
@@ -52,7 +47,7 @@ public class SetScheduledPingService implements EventListenerChatBot {
     private static final String HANDLE_COMMAND = "/set_ping";
     private static final String LLM_DEFICIT_MSG = "Мало данных";
 
-    private final Scheduler scheduler;
+    private final ScheduledPingService scheduledPingService;
     private final JobBindingService jobBindingService;
     private final ObserverChatBotAdapter observerChatBotAdapter;
     private final ConfigurateBotService configurateBotService;
@@ -73,9 +68,6 @@ public class SetScheduledPingService implements EventListenerChatBot {
         ChatConfiguration chatConfig = configurateBotService.getChatConfig(updateContext.getChatId());
         ParsedSetPingMessage params = parseWithLLM(updateContext, chatConfig);
 
-        JobDataMap data = new JobDataMap();
-        data.put("setPingDto", params.getSetPingDto());
-
         String jobName = jobBindingService.save(JobBindingChat.builder()
                     .chatConfiguration(chatConfig)
                     .taskId(params.getSetPingDto().getTaskId())
@@ -87,33 +79,19 @@ public class SetScheduledPingService implements EventListenerChatBot {
                 .build()
             ).getId().toString();
 
-        JobDetail job = JobBuilder.newJob(PingJob.class)
-                .withIdentity(jobName, "pingByTaskGroup")
-                .usingJobData(data)
-            .build();
+        JobDataMap data = new JobDataMap();
+        data.put("setPingDto", params.getSetPingDto());
+        data.put("setJobName", jobName);
 
-        Trigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity("pingTrigger_" + jobName, "pingByTaskGroup")
-                .withSchedule(params.getSchedule())
-                .endAt(Date.from(params.getZonedDateTime().toInstant()))
-            .build();
+        JobDetail job = scheduledPingService.createJob(jobName, data);
+        Trigger trigger = scheduledPingService.createTrigger(jobName, params.getSchedule(), params.getZonedDateTime());
 
-        try {
-            scheduler.scheduleJob(job, trigger);
+        scheduledPingService.startJob(job, trigger, updateContext.getChatId());
 
-            commandUtils.fastSend(
-                updateContext, 
-                String.format("Пинг создан с номером #%s", jobName)
-            );
-        } catch(SchedulerException e) {
-            log.error("Error create ping: {}", e.getMessage());
-            jobBindingService.deleteJobById(Long.valueOf(jobName));
-
-            commandUtils.fastSend(
-                updateContext, 
-                "Не удалось создать пинг"
-            );
-        }
+        commandUtils.fastSend(
+            updateContext, 
+            String.format("Пинг создан с номером #%s", jobName)
+        );
     }
 
     private ParsedSetPingMessage parseWithLLM(
