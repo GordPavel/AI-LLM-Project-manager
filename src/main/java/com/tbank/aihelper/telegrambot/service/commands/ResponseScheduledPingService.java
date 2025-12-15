@@ -1,11 +1,14 @@
 package com.tbank.aihelper.telegrambot.service.commands;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.tbank.aihelper.llm.LLMAdapter;
+import com.tbank.aihelper.telegrambot.ChatBotAdapter;
+import com.tbank.aihelper.telegrambot.dto.BotMessage;
 import com.tbank.aihelper.telegrambot.dto.UpdateContext;
 import com.tbank.aihelper.telegrambot.entity.ChatConfiguration;
 import com.tbank.aihelper.telegrambot.entity.JobBindingChat;
@@ -20,6 +23,7 @@ import com.tbank.aihelper.telegrambot.repository.ResponseStatusTaskRepository;
 import com.tbank.aihelper.telegrambot.repository.TaskStatusRepository;
 import com.tbank.aihelper.telegrambot.service.CommandUtilsService;
 import com.tbank.aihelper.telegrambot.service.JobBindingService;
+import com.tbank.aihelper.telegrambot.service.ScheduledPingService;
 import com.tbank.aihelper.telegrambot.service.UserService;
 
 import jakarta.annotation.PostConstruct;
@@ -34,6 +38,8 @@ public class ResponseScheduledPingService implements EventListenerChatBot {
     private static final String HANDLE_COMMAND = "/response_ping";
     private static final String LLM_DEFICIT_MSG = "Мало данных";
     
+    private final ChatBotAdapter chatBotAdapter;
+    private final ScheduledPingService scheduledPingService;
     private final ObserverChatBotAdapter observerChatBotAdapter;
     private final ConfigurateBotService configurateBotService;
     private final JobBindingService jobBindingService;
@@ -63,6 +69,31 @@ public class ResponseScheduledPingService implements EventListenerChatBot {
             "Статус выполнения задачи был помечен как: '" + rst.getIdentifiedLLMStatus().getStatus() + "'\n"
                 + rst.getAdviceLLM() 
         );
+
+        checkAndSetStatusTask(
+            rst.getJobBindedChat().getId().toString(),
+            rst.getJobBindedChat().getTaskId(),
+            rst.getJobBindedChat().getChatConfiguration().getChatId()
+        );
+    }
+
+    private void checkAndSetStatusTask(String jobName, String taskId, Long chatId) {
+        if(!scheduledPingService.getNotDoneExecutors(
+                Long.valueOf(jobName), 
+                new HashSet<>(scheduledPingService.getDoneExecutors(Long.valueOf(jobName))),
+                chatId
+            ).isEmpty())
+            return;
+        
+        scheduledPingService.setTaskDone(jobName, taskId, chatId);
+
+        chatBotAdapter.sendMessage(BotMessage.builder()
+                .chatId(chatId)
+                .textMessage(String.format(
+                    "Бот пометил задачу #%s как: %s", 
+                    taskId, ScheduledPingService.STATUS_TASK_COMPLETED)
+                )
+            .build());
     }
 
     private ResponseStatusTask parseWithLLM(

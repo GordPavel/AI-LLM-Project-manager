@@ -1,8 +1,5 @@
 package com.tbank.aihelper.telegrambot.service.commands;
 
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
 import org.springframework.stereotype.Service;
 
 import com.tbank.aihelper.telegrambot.dto.UpdateContext;
@@ -11,6 +8,7 @@ import com.tbank.aihelper.telegrambot.observer.EventListenerChatBot;
 import com.tbank.aihelper.telegrambot.observer.ObserverChatBotAdapter;
 import com.tbank.aihelper.telegrambot.service.CommandUtilsService;
 import com.tbank.aihelper.telegrambot.service.JobBindingService;
+import com.tbank.aihelper.telegrambot.service.ScheduledPingService;
 
 import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
@@ -28,7 +26,7 @@ public class DeleteScheduledPingService implements EventListenerChatBot {
     
     private static final String HANDLE_COMMAND = "/delete_ping";
 
-    private final Scheduler scheduler;
+    private final ScheduledPingService scheduledPingService;
     private final JobBindingService jobBindingService;
     private final ObserverChatBotAdapter observerChatBotAdapter;
     private final CommandUtilsService commandUtils;
@@ -51,21 +49,10 @@ public class DeleteScheduledPingService implements EventListenerChatBot {
             return;
         String jobId = jobBindChat.getId().toString();
 
-        try {
-            jobBindingService.deleteJobById(Long.valueOf(jobId));
-            scheduler.deleteJob(new JobKey(jobId, "pingByTaskGroup"));
-
-            commandUtils.fastSend(
-                updateContext, 
-                String.format("Пинг с номером #%s, успешно удалён", jobId)
-            );
-        } catch(SchedulerException e) {
-            log.error("Error delete ping: {}", e.getMessage());
-            
-            commandUtils.fastSend(
-                updateContext, 
-                "Не удалось удалить пинг"
-            );
-        }
+        scheduledPingService.stopJob(jobId, updateContext.getChatId()); 
+        commandUtils.fastSend(
+            updateContext, 
+            String.format("Пинг с номером #%s, успешно удалён", jobId)
+        );
     } 
 }
